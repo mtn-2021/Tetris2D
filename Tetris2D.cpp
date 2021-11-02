@@ -5,11 +5,17 @@
 #include "Tetris2D.h"
 #include "peace.h"
 #include "Zpeace.h"
+#include "Speace.h"
+#include "Opeace.h"
+#include "Ipeace.h"
+#include "Jpeace.h"
+#include "Lpeace.h"
+#include "Tpeace.h"
 
 #define MAX_LOADSTRING 100
 #define MARGIN 10
 #define BOARD_LINE_WIDTH 1
-#define BOARD_HEIGHT 20
+#define BOARD_HEIGHT 21
 #define BOARD_WIDTH 10
 #define BLOCK_SIZE 30
 #define CLIENT_WIDTH (MARGIN*2 + (BOARD_WIDTH * BLOCK_SIZE))
@@ -19,30 +25,38 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-bool activatePeace = true;
-bool init = true;
-bool clearStack = false;
+peace *ps = new peace;
+int peaceNum = 0;
 int MoveSp = 2;
 int countTime = 0;
-std::vector<std::vector<int>> board(20, std::vector<int>(10, 0));
-std::vector<int> clearLine(20 , 0);
 int colors[][2] = {
     {RGB(255,100,0),RGB(255,0,0)},
-    {} };
-int peaceNum = 0;
-peace *ps = new peace;
-
+    {RGB(100,255,0),RGB(0,255,0)},
+    {RGB(255,255,0),RGB(100,100,0)},
+    {RGB(170,202,255),RGB(50,50,200)},
+    {RGB(0,0,255),RGB(150,150,200)},
+    {RGB(240,128,128),RGB(200,50,100)},
+    {RGB(167,87,168),RGB(200,0,255)}
+};
+bool init = true;
+bool clearStack = false;
+std::vector<std::vector<int>> board(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, 0));
+std::vector<int> clearLine(BOARD_HEIGHT , 0);
+std::random_device rnd;
+std::mt19937 mt(rnd());
+std::uniform_int_distribution<> rndP(0,6);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void PaintAll(HWND);
-void DrawLine(HWND,HDC);
+void DrawLine(HWND, HDC);
+void DrawDeadLine(HWND, HDC);
 void DrawBlock(HWND, HDC);
-void DrawBlock(HWND,HDC);
 void OperateBlock(HWND);
 void GeneratePeace();
+void GameOver(HWND);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -52,6 +66,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    // GeneratePeace(); すぐにスタート　今は1秒のディレイをつけている
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_TETRIS2D, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
@@ -76,12 +91,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 }
 
 
-
-//
-//  関数: MyRegisterClass()
-//
-//  目的: ウィンドウ クラスを登録します。
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -102,7 +111,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     return RegisterClassExW(&wcex);
 }
-
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
@@ -144,6 +152,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        MessageBox(hWnd,
            (LPCWSTR)L"errer on timer",
            (LPCWSTR)L"miss timer start", MB_OK);
+       DestroyWindow(hWnd);
    }
 
    return TRUE;
@@ -178,18 +187,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ps->Thift(board,BLOCK_SIZE, 1);
             break;
         case VK_DOWN:
-            //MoveSp = 20;
+            ps->DownToBottom(board, BLOCK_SIZE);
             break;
         case VK_SPACE:
             ps->Rotation(board, BLOCK_SIZE);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    case WM_KEYUP:
-        switch (wParam) {
-        case VK_DOWN:
-            MoveSp = 2;
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -241,6 +242,7 @@ void PaintAll(HWND hWnd) {
             DrawLine(hWnd, hdc);
             init = false;
         }
+    DrawDeadLine(hWnd, hdc);
     ps->Draw(hWnd, hdc,BLOCK_SIZE,MARGIN, MoveSp,colors[peaceNum]);
     DrawBlock(hWnd,hdc);
     EndPaint(hWnd, &pst);
@@ -261,15 +263,27 @@ void DrawLine(HWND hWnd,HDC hdc) {
     DeleteObject(pen);
 }
 
+void DrawDeadLine(HWND hWnd,HDC hdc){
+    HPEN pen = CreatePen(PS_SOLID, BOARD_LINE_WIDTH, RGB(255, 0, 0));
+    HPEN oldPen = (HPEN)SelectObject(hdc, pen);
+    MoveToEx(hdc, MARGIN, MARGIN + BLOCK_SIZE, NULL);
+    LineTo(hdc, MARGIN + (BLOCK_SIZE * BOARD_WIDTH), MARGIN + BLOCK_SIZE);
+    SelectObject(hdc, oldPen);
+    DeleteObject(pen);
+
+}
+
 void DrawBlock(HWND hWnd, HDC hdc) {
     HPEN hPen,hOldPen;
     HBRUSH hBrush,hOldBrush;
-    for (int i = 0; i < board.size(); i++) {
-        for (int j = 0; j < board.at(0).size(); j++) {
+    int colorNum;
+    for (int i = 0; i < BOARD_HEIGHT; i++) {
+        for (int j = 0; j < BOARD_WIDTH; j++) {
             if (board.at(i).at(j) != 0) {
-                hPen = CreatePen(PS_SOLID, 1, colors[peaceNum][1]);
+                colorNum = board.at(i).at(j) - 1;
+                hPen = CreatePen(PS_SOLID, 1, colors[colorNum][1]);
                 hOldPen = (HPEN)SelectObject(hdc, hPen);
-                hBrush = CreateSolidBrush(colors[peaceNum][0]);
+                hBrush = CreateSolidBrush(colors[colorNum][0]);
                 hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
 
                 Rectangle(hdc, 
@@ -296,30 +310,34 @@ void OperateBlock(HWND hWnd) {
     if (countTime >= (1000 / TIMER_SPAN)) {
         if (!clearStack) {
             ps->Fix(board, BLOCK_SIZE, peaceNum);
-            for (int i = 0; i < board.size(); i++) {
+            for (int i = 0; i < BOARD_WIDTH; i++) {
+                if (board.at(0).at(i) != 0) GameOver(hWnd);
+            }
+            for (int i = 1; i < BOARD_HEIGHT; i++) {
                 lineFill = true;
-                for (int j = 0; j < board.at(i).size(); j++) {
+                for (int j = 0; j < BOARD_WIDTH; j++) {
                     if (board.at(i).at(j) == 0) {
                         lineFill = false; break;
                     }
                 }
                 if (lineFill) {
                     clearStack = true;
-                    for (int j = 0; j < board.at(i).size(); j++) {
+                    for (int j = 0; j < BOARD_WIDTH; j++) {
                         board.at(i).at(j) = 0;
                     }
                     clearLine.at(i) = 1;
                 }
             }
             if (clearStack) {
-                ps = new peace();
+                peaceNum = 0;
+                ps = new peace();       
                 init = true;
                 InvalidateRect(hWnd, NULL, TRUE);
                 return;
             }
         } else {
             clearStack = false;
-            for (int i = 0; i < clearLine.size(); i++) {
+            for (int i = 0; i < BOARD_HEIGHT; i++) {
                 if (clearLine.at(i) != 0) {
                     board.erase(board.begin() + i);
                     board.insert(board.begin(), std::vector<int>(10, 0));
@@ -336,5 +354,54 @@ void OperateBlock(HWND hWnd) {
 }
 
 void GeneratePeace() {
-    ps = new Zpeace(BLOCK_SIZE);
+    peaceNum = rndP(mt);
+    switch (peaceNum)
+    {
+    case 0:
+        ps = new Zpeace(BLOCK_SIZE);
+        break;
+    case 1:
+        ps = new Speace(BLOCK_SIZE);
+        break;
+    case 2:
+        ps = new Opeace(BLOCK_SIZE);
+        break;
+    case 3:
+        ps = new Ipeace(BLOCK_SIZE);
+        break;
+    case 4:
+        ps = new Jpeace(BLOCK_SIZE);
+        break;
+    case 5:
+        ps = new Lpeace(BLOCK_SIZE);
+        break;
+    case 6:
+        ps = new Tpeace(BLOCK_SIZE);
+        break;
+    default:
+        ps = new peace();
+    }
+    
+}
+
+void GameOver(HWND hWnd) {
+
+    KillTimer(hWnd, IDT_BLOCK);
+    int id = MessageBox(NULL, L"GameOver", L"もう一度プレイしますか", MB_YESNO | MB_ICONSTOP);
+    switch (id) {
+    case IDYES:
+        board = std::vector<std::vector<int>>(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, 0));
+        if (SetTimer(hWnd, IDT_BLOCK, TIMER_SPAN, NULL) == 0) {
+            MessageBox(hWnd,
+                (LPCWSTR)L"errer on timer",
+                (LPCWSTR)L"miss timer start", MB_OK);
+        }
+        GeneratePeace();
+        init = true;
+        InvalidateRect(hWnd, NULL, TRUE);
+        break;
+    case IDNO:
+        DestroyWindow(hWnd);
+        break;
+    }
 }

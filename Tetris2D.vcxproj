@@ -140,10 +140,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Ipeace.h" />
+    <ClInclude Include="Jpeace.h" />
+    <ClInclude Include="Lpeace.h" />
+    <ClInclude Include="Opeace.h" />
     <ClInclude Include="peace.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Speace.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tetris2D.h" />
+    <ClInclude Include="Tpeace.h" />
     <ClInclude Include="Zpeace.h" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +159,7 @@
     <ResourceCompile Include="Tetris2D.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="gameover.ico" />
     <Image Include="small.ico" />
     <Image Include="Tetris2D.ico" />
   </ItemGroup>

@@ -33,6 +33,24 @@
     <ClInclude Include="peace.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Speace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Opeace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Ipeace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Jpeace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Lpeace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Tpeace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris2D.cpp">
@@ -49,6 +67,9 @@
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="Tetris2D.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="gameover.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
   </ItemGroup>
