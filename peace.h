@@ -19,6 +19,7 @@ protected:
 
 public:
 	peace() : list{ &blockA,&blockB,&blockC,&blockD }, movedList{ &movedA, &movedB, &movedC, &movedD } {}
+
 	virtual bool DropDown(vector<vector<int>>& board, int moveSp, int size) {
 		for (int i = 0; i < 4; i++) {
 			unsigned _int64 bottomPos = (list[i]->second / size);

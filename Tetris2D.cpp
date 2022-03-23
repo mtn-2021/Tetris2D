@@ -12,6 +12,11 @@
 #include "Lpeace.h"
 #include "Tpeace.h"
 
+#include <crtdbg.h>
+#ifdef _DEBUG
+#define	new	new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 #define MAX_LOADSTRING 100
 #define MARGIN 10
 #define BOARD_LINE_WIDTH 1
@@ -63,10 +68,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF |_CRTDBG_LEAK_CHECK_DF);
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // GeneratePeace(); すぐにスタート　今は1秒のディレイをつけている
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_TETRIS2D, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
@@ -208,6 +214,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
         KillTimer(hWnd, IDT_BLOCK);
+        delete ps;
         PostQuitMessage(0);
         break;
     default:
@@ -311,7 +318,7 @@ void OperateBlock(HWND hWnd) {
         if (!clearStack) {
             ps->Fix(board, BLOCK_SIZE, peaceNum);
             for (int i = 0; i < BOARD_WIDTH; i++) {
-                if (board.at(0).at(i) != 0) GameOver(hWnd);
+                if (board.at(0).at(i) != 0) { GameOver(hWnd); return; }
             }
             for (int i = 1; i < BOARD_HEIGHT; i++) {
                 lineFill = true;
@@ -330,7 +337,8 @@ void OperateBlock(HWND hWnd) {
             }
             if (clearStack) {
                 peaceNum = 0;
-                ps = new peace();       
+                delete ps;
+                ps = new peace();
                 init = true;
                 InvalidateRect(hWnd, NULL, TRUE);
                 return;
@@ -355,6 +363,7 @@ void OperateBlock(HWND hWnd) {
 
 void GeneratePeace() {
     peaceNum = rndP(mt);
+    delete ps;
     switch (peaceNum)
     {
     case 0:

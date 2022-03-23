@@ -1,5 +1,6 @@
 #pragma once
 #include "peace.h"
+
 class Zpeace : public peace
 {
 public:
