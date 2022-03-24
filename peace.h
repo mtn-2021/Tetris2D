@@ -242,5 +242,4 @@ public:
 		DeleteObject(hPen);
 		DeleteObject(hBrush);
 	}
-	 
 };

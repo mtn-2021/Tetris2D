@@ -1,55 +1,26 @@
-﻿// Tetris2D.cpp : アプリケーションのエントリ ポイントを定義します。
-//
-
-#include "framework.h"
+﻿#include "framework.h"
 #include "Tetris2D.h"
-#include "peace.h"
-#include "Zpeace.h"
-#include "Speace.h"
-#include "Opeace.h"
-#include "Ipeace.h"
-#include "Jpeace.h"
-#include "Lpeace.h"
-#include "Tpeace.h"
+using namespace std;
 
 #include <crtdbg.h>
 #ifdef _DEBUG
 #define	new	new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 
-#define MAX_LOADSTRING 100
-#define MARGIN 10
-#define BOARD_LINE_WIDTH 1
-#define BOARD_HEIGHT 21
-#define BOARD_WIDTH 10
-#define BLOCK_SIZE 30
-#define CLIENT_WIDTH (MARGIN*2 + (BOARD_WIDTH * BLOCK_SIZE))
-#define CLIENT_HEIGHT (MARGIN*2 + (BOARD_HEIGHT * BLOCK_SIZE))
-#define TIMER_SPAN 10
-
 HINSTANCE hInst;                                // 現在のインターフェイス
-WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
-WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-peace *ps = new peace;
-int peaceNum = 0;
-int MoveSp = 2;
-int countTime = 0;
-int colors[][2] = {
-    {RGB(255,100,0),RGB(255,0,0)},
-    {RGB(100,255,0),RGB(0,255,0)},
-    {RGB(255,255,0),RGB(100,100,0)},
-    {RGB(170,202,255),RGB(50,50,200)},
-    {RGB(0,0,255),RGB(150,150,200)},
-    {RGB(240,128,128),RGB(200,50,100)},
-    {RGB(167,87,168),RGB(200,0,255)}
-};
-bool init = true;
-bool clearStack = false;
-std::vector<std::vector<int>> board(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, 0));
-std::vector<int> clearLine(BOARD_HEIGHT , 0);
-std::random_device rnd;
-std::mt19937 mt(rnd());
-std::uniform_int_distribution<> rndP(0,6);
+static WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
+static WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
+static peace *ps = new peace;
+static int peaceNum = 0;
+static int MoveSp = 2;
+static int countTime = 0;
+static bool init = true;
+static bool clearStack = false;
+static vector<vector<int>> board(BOARD_HEIGHT, vector<int>(BOARD_WIDTH, 0));
+static vector<int> clearLine(BOARD_HEIGHT , 0);
+static random_device rnd;
+static mt19937 mt(rnd());
+static uniform_int_distribution<> rndP(0,6);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -100,9 +71,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
-
     wcex.cbSize = sizeof(WNDCLASSEX);
-
     wcex.style          = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc    = WndProc;
     wcex.cbClsExtra     = 0;
@@ -223,25 +192,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
 void PaintAll(HWND hWnd) {
     PAINTSTRUCT pst;
     HDC hdc = BeginPaint(hWnd, &pst);
@@ -348,7 +298,7 @@ void OperateBlock(HWND hWnd) {
             for (int i = 0; i < BOARD_HEIGHT; i++) {
                 if (clearLine.at(i) != 0) {
                     board.erase(board.begin() + i);
-                    board.insert(board.begin(), std::vector<int>(10, 0));
+                    board.insert(board.begin(), vector<int>(10, 0));
                     clearLine.at(i) = 0;
                 }
             }
@@ -357,6 +307,7 @@ void OperateBlock(HWND hWnd) {
             InvalidateRect(hWnd, NULL, TRUE);
         }
         GeneratePeace();
+        countTime = 0;
     }
     InvalidateRect(hWnd, NULL, FALSE);
 }
@@ -393,13 +344,32 @@ void GeneratePeace() {
     
 }
 
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
 void GameOver(HWND hWnd) {
 
     KillTimer(hWnd, IDT_BLOCK);
     int id = MessageBox(NULL, L"GameOver", L"もう一度プレイしますか", MB_YESNO | MB_ICONSTOP);
     switch (id) {
     case IDYES:
-        board = std::vector<std::vector<int>>(BOARD_HEIGHT, std::vector<int>(BOARD_WIDTH, 0));
+        board = vector<vector<int>>(BOARD_HEIGHT, vector<int>(BOARD_WIDTH, 0));
         if (SetTimer(hWnd, IDT_BLOCK, TIMER_SPAN, NULL) == 0) {
             MessageBox(hWnd,
                 (LPCWSTR)L"errer on timer",

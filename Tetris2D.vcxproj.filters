@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ヘッダー ファイル\peaces">
+      <UniqueIdentifier>{ff823a51-ce2b-479a-9acc-fbe2d9cdea65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,29 +30,29 @@
     <ClInclude Include="Tetris2D.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Zpeace.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Tpeace.h">
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
-    <ClInclude Include="peace.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Zpeace.h">
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
     <ClInclude Include="Speace.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\peaces</Filter>
+    </ClInclude>
+    <ClInclude Include="peace.h">
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
     <ClInclude Include="Opeace.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Ipeace.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Jpeace.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
     <ClInclude Include="Lpeace.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
-    <ClInclude Include="Tpeace.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Jpeace.h">
+      <Filter>ヘッダー ファイル\peaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Ipeace.h">
+      <Filter>ヘッダー ファイル\peaces</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
