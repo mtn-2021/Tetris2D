@@ -1,6 +1,6 @@
 #pragma once
 #include "peace.h"
-class Ipeace : public peace
+class Ipeace : public peace 
 {
 public:
 	Ipeace(int size) {
